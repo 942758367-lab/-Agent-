@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrandOS 企业品牌智能平台｜交互原型</title>
+  <style>
+    :root {
+      --brand: #2457f5;
+      --brand-2: #6d5dfc;
+      --brand-soft: #eef3ff;
+      --ink: #172033;
+      --muted: #6f788a;
+      --line: #e7eaf0;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --success: #1c9b70;
+      --warning: #e48b27;
+      --danger: #d94b62;
+      --shadow: 0 12px 36px rgba(29, 43, 76, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+    .app { min-height: 100vh; display: flex; }
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0; z-index: 20;
+      width: 232px; padding: 20px 14px 16px;
+      background: #111a2d; color: #c9d0df;
+      display: flex; flex-direction: column;
+    }
+    .logo { display: flex; align-items: center; gap: 11px; padding: 4px 10px 24px; }
+    .logo-mark {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: linear-gradient(140deg, #3972ff, #8f68ff);
+      display: grid; place-items: center; color: white; font-weight: 800;
+      box-shadow: 0 8px 22px rgba(61, 103, 255, .35);
+    }
+    .logo b { display: block; color: white; font-size: 17px; letter-spacing: .2px; }
+    .logo small { display: block; margin-top: 2px; font-size: 10px; color: #8d98ae; }
+    .nav-label { padding: 17px 11px 8px; color: #68748d; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    .nav-item {
+      width: 100%; border: 0; background: transparent; color: #aeb8ca;
+      padding: 10px 12px; border-radius: 10px; margin: 2px 0;
+      display: flex; align-items: center; gap: 11px; text-align: left;
+      transition: .18s ease;
+    }
+    .nav-item:hover { color: white; background: rgba(255,255,255,.06); }
+    .nav-item.active { color: white; background: linear-gradient(90deg, rgba(55,103,255,.34), rgba(109,93,252,.16)); }
+    .nav-icon { width: 18px; text-align: center; opacity: .9; }
+    .sidebar-foot {
+      margin-top: auto; padding: 13px 11px; border-radius: 12px;
+      background: rgba(255,255,255,.055);
+    }
+    .sidebar-foot strong { display: block; font-size: 12px; color: #fff; }
+    .sidebar-foot span { display: block; font-size: 10px; color: #7f8ba1; margin-top: 5px; }
+    .main { width: calc(100% - 232px); margin-left: 232px; min-height: 100vh; }
+    .topbar {
+      height: 70px; padding: 0 28px; background: rgba(255,255,255,.92);
+      border-bottom: 1px solid var(--line); display: flex; align-items: center;
+      position: sticky; top: 0; z-index: 15; backdrop-filter: blur(16px);
+    }
+    .crumb { font-size: 14px; color: var(--muted); }
+    .crumb b { color: var(--ink); }
+    .top-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .search-mini {
+      width: 230px; display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1px solid transparent; border-radius: 10px;
+      padding: 9px 12px; color: #9098a7; font-size: 12px;
+    }
+    .icon-btn {
+      width: 36px; height: 36px; border: 1px solid var(--line); background: white;
+      border-radius: 10px; color: var(--muted);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 9px; padding: 5px 8px 5px 5px;
+      border: 1px solid var(--line); background: white; border-radius: 12px;
+    }
+    .avatar { width: 30px; height: 30px; border-radius: 9px; background: #dfe7ff; color: var(--brand); display: grid; place-items: center; font-weight: 700; }
+    .user-pill strong { font-size: 12px; display: block; }
+    .user-pill small { font-size: 10px; color: var(--muted); display: block; }
+    .content { padding: 26px 28px 44px; max-width: 1500px; margin: auto; }
+    .view { display: none; animation: rise .25s ease; }
+    .view.active { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    h1, h2, h3, p { margin-top: 0; }
+    .page-head { display: flex; align-items: flex-end; margin-bottom: 22px; gap: 20px; }
+    .page-head h1 { font-size: 24px; margin-bottom: 6px; letter-spacing: -.4px; }
+    .page-head p { color: var(--muted); font-size: 13px; margin-bottom: 0; }
+    .page-head .actions { margin-left: auto; display: flex; gap: 9px; }
+    .btn {
+      border: 1px solid var(--line); color: var(--ink); background: white;
+      padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 650;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { color: white; border-color: var(--brand); background: var(--brand); box-shadow: 0 8px 18px rgba(36,87,245,.2); }
+    .btn.soft { color: var(--brand); border-color: transparent; background: var(--brand-soft); }
+    .card { background: white; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 18px rgba(30,44,77,.025); }
+    .grid { display: grid; gap: 16px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .hero {
+      position: relative; overflow: hidden; padding: 30px;
+      background: linear-gradient(130deg, #17244a, #223f8c 62%, #6356cc);
+      color: white; border-radius: 20px; min-height: 215px;
+      box-shadow: 0 18px 45px rgba(33,58,125,.18);
+    }
+    .hero:before, .hero:after { content:""; position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.1); }
+    .hero:before { width: 330px; height: 330px; right: -80px; top: -155px; }
+    .hero:after { width: 220px; height: 220px; right: 80px; bottom: -150px; }
+    .hero-kicker { font-size: 12px; color: #a9beff; font-weight: 650; letter-spacing: .5px; }
+    .hero h1 { font-size: 29px; margin: 13px 0 9px; }
+    .hero p { color: #c8d2eb; font-size: 13px; max-width: 600px; line-height: 1.7; }
+    .askbox {
+      position: relative; z-index: 2; margin-top: 20px; max-width: 730px;
+      display: flex; align-items: center; background: white; border-radius: 14px;
+      padding: 6px 6px 6px 16px; color: var(--ink);
+      box-shadow: 0 12px 26px rgba(8,17,48,.18);
+    }
+    .askbox input { flex: 1; border: 0; outline: 0; padding: 9px 0; min-width: 0; }
+    .askbox button { border: 0; border-radius: 10px; padding: 10px 16px; color: white; background: var(--brand); font-weight: 700; }
+    .section-title { display: flex; align-items: center; margin: 24px 0 12px; }
+    .section-title h2 { font-size: 16px; margin: 0; }
+    .section-title span { margin-left: 9px; color: var(--muted); font-size: 11px; }
+    .quick { padding: 18px; min-height: 122px; transition: .2s; cursor: pointer; }
+    .quick:hover { border-color: #c9d5ff; transform: translateY(-2px); box-shadow: var(--shadow); }
+    .quick .qicon { width: 37px; height: 37px; display:grid; place-items:center; border-radius:11px; background:var(--brand-soft); margin-bottom:13px; }
+    .quick h3 { font-size: 13px; margin-bottom: 6px; }
+    .quick p { color: var(--muted); font-size: 11px; line-height: 1.55; margin: 0; }
+    .recent { padding: 5px 18px; }
+    .recent-row { display: grid; grid-template-columns: 1fr 110px 85px; align-items: center; border-bottom: 1px solid var(--line); padding: 14px 0; font-size: 12px; }
+    .recent-row:last-child { border-bottom: 0; }
+    .recent-row span { color: var(--muted); }
+    .chip { display: inline-flex; padding: 4px 8px; font-size: 10px; border-radius: 20px; background: #eef3ff; color: var(--brand); }
+    .chip.green { background:#eaf8f3; color:var(--success); }
+    .chip.orange { background:#fff4e6; color:var(--warning); }
+    .chip.gray { background:#f1f2f5; color:#737b88; }
+    .toolbar { padding: 14px; display:flex; gap:10px; align-items:center; margin-bottom:16px; }
+    .field {
+      background: white; border: 1px solid var(--line); border-radius: 10px;
+      padding: 9px 11px; color: var(--muted); font-size: 12px;
+    }
+    .field.grow { flex: 1; }
+    .asset-card { overflow: hidden; }
+    .thumb { height: 145px; padding: 18px; display: grid; place-items: center; background: #edf1f7; position: relative; }
+    .thumb.blue { background: linear-gradient(140deg,#e8efff,#cad8ff); }
+    .thumb.dark { background: linear-gradient(140deg,#1a2440,#3453a2); color:white; }
+    .thumb.warm { background: linear-gradient(140deg,#fff2dc,#f7d5bd); }
+    .thumb.gridbg { background-color:#f6f6f7; background-image:linear-gradient(#e8e8ec 1px,transparent 1px),linear-gradient(90deg,#e8e8ec 1px,transparent 1px); background-size:16px 16px; }
+    .product-shape { width: 58px; height: 82px; border-radius: 10px 10px 18px 18px; background: linear-gradient(160deg,#f8fbff,#a9b7c9); box-shadow: 0 16px 22px rgba(28,42,73,.2); position:relative; }
+    .product-shape:after { content:""; position:absolute; width:28px; height:6px; border-radius:4px; background:#324052; left:15px; top:13px; }
+    .logo-demo { font-size: 25px; font-weight: 900; letter-spacing: 2px; color:#2555e8; }
+    .video-demo { width:54px; height:54px; border-radius:50%; border:1px solid rgba(255,255,255,.4); display:grid;place-items:center;background:rgba(255,255,255,.1); }
+    .asset-info { padding: 14px; }
+    .asset-info h3 { font-size: 13px; margin-bottom: 7px; }
+    .meta { color: var(--muted); font-size: 10px; display: flex; justify-content: space-between; gap: 8px; }
+    .template-card { overflow:hidden; cursor:pointer; transition:.2s; }
+    .template-card.selected { border: 2px solid var(--brand); }
+    .slide-preview { height:160px; padding:17px; background:#17244a; color:white; }
+    .slide-preview.light { background:#f3f5f8;color:var(--ink); }
+    .slide-preview .mini-line { width:55%; height:5px; background:currentColor; opacity:.85; margin:7px 0; border-radius:4px; }
+    .slide-preview .mini-line.small { width:30%; opacity:.3; }
+    .slide-preview .visual { height:65px; margin-top:17px; border-radius:8px; background:linear-gradient(135deg,#3872ff,#805ce7); opacity:.85; }
+    .template-info { padding:14px; }
+    .template-info h3 { font-size:13px;margin-bottom:5px; }
+    .form-card { padding:20px; }
+    .form-group { margin-bottom:15px; }
+    .form-group label { display:block;font-size:11px;font-weight:700;margin-bottom:7px; }
+    .form-control { width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;outline:0;background:#fff; }
+    .form-control:focus { border-color:#9eb3ff;box-shadow:0 0 0 3px #edf2ff; }
+    textarea.form-control { resize:vertical;min-height:92px; }
+    .steps { display:flex;align-items:center;margin-bottom:20px; }
+    .step { flex:1; position:relative; font-size:10px; color:var(--muted); text-align:center; }
+    .step:before { content:"";position:absolute;height:2px;background:var(--line);top:12px;left:-50%;right:50%; }
+    .step:first-child:before { display:none; }
+    .step i { position:relative;z-index:2;width:25px;height:25px;border-radius:50%;background:#e8ebf1;display:grid;place-items:center;margin:0 auto 5px;font-style:normal; }
+    .step.active { color:var(--brand);font-weight:700; }
+    .step.active i { background:var(--brand);color:white; }
+    .stat { padding:18px; }
+    .stat .stat-top { display:flex;justify-content:space-between;color:var(--muted);font-size:11px; }
+    .stat b { display:block;font-size:25px;margin:11px 0 5px;letter-spacing:-.5px; }
+    .stat small { color:var(--success);font-size:10px; }
+    .stat small.neutral { color:var(--muted); }
+    .admin-grid { display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-top:16px; }
+    .panel-head { padding:18px 18px 12px;display:flex;align-items:center; }
+    .panel-head h2 { margin:0;font-size:14px; }
+    .panel-head a { margin-left:auto;font-size:10px;color:var(--brand); }
+    .bars { padding:5px 18px 20px;height:190px;display:flex;align-items:flex-end;gap:12px; }
+    .bar-col { flex:1;text-align:center;color:var(--muted);font-size:9px; }
+    .bar { border-radius:7px 7px 2px 2px;background:linear-gradient(#537cff,#2859ed);margin-bottom:7px;min-height:12px; }
+    .activity { padding:5px 18px 14px; }
+    .activity-row { display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line); }
+    .activity-row:last-child { border-bottom:0; }
+    .doticon { width:31px;height:31px;border-radius:9px;background:var(--brand-soft);display:grid;place-items:center;font-size:12px; }
+    .activity-row strong { display:block;font-size:11px;margin-bottom:3px; }
+    .activity-row small { display:block;color:var(--muted);font-size:9px; }
+    .table-card { overflow:hidden; }
+    table { border-collapse:collapse;width:100%;font-size:11px; }
+    th { background:#fafbfc;color:#7b8494;text-align:left;padding:12px 14px;font-weight:650;border-bottom:1px solid var(--line); }
+    td { padding:13px 14px;border-bottom:1px solid var(--line); }
+    tr:last-child td { border-bottom:0; }
+    .file-cell { display:flex;align-items:center;gap:9px; }
+    .file-icon { width:30px;height:30px;border-radius:8px;background:#eef2ff;color:var(--brand);display:grid;place-items:center;font-size:9px;font-weight:800; }
+    .file-cell b { display:block;font-size:11px; }
+    .file-cell small { color:var(--muted);font-size:9px; }
+    .tabs { display:flex;gap:4px;padding:4px;background:#eef1f5;border-radius:10px;width:max-content;margin-bottom:15px; }
+    .tab { border:0;background:transparent;padding:7px 12px;border-radius:7px;color:var(--muted);font-size:11px; }
+    .tab.active { background:white;color:var(--ink);box-shadow:0 2px 8px rgba(31,44,73,.08);font-weight:700; }
+    .role-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
+    .role-card { padding:17px; }
+    .role-card .role-head { display:flex;align-items:center; }
+    .role-card .role-head b { font-size:13px; }
+    .role-card .count { margin-left:auto;color:var(--muted);font-size:10px; }
+    .role-card p { font-size:10px;color:var(--muted);line-height:1.6;margin:10px 0 12px; }
+    .permission-list { padding:0;margin:0;list-style:none; }
+    .permission-list li { font-size:10px;padding:6px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between; }
+    .toggle { width:30px;height:17px;border-radius:20px;background:#cbd1dc;padding:2px;display:inline-flex;justify-content:flex-start; }
+    .toggle.on { background:var(--brand);justify-content:flex-end; }
+    .toggle:after { content:"";width:13px;height:13px;border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .model-card { padding:20px;position:relative; }
+    .model-card .model-tag { position:absolute;right:14px;top:14px; }
+    .model-logo { width:42px;height:42px;border-radius:12px;background:#eef2ff;display:grid;place-items:center;color:var(--brand);font-weight:800;margin-bottom:14px; }
+    .model-card h3 { font-size:14px;margin-bottom:6px; }
+    .model-card p { color:var(--muted);font-size:10px;line-height:1.6;min-height:48px; }
+    .config-row { display:flex;align-items:center;border-top:1px solid var(--line);padding:11px 0;font-size:10px; }
+    .config-row span:last-child { margin-left:auto;color:var(--muted); }
+    .routing { padding:20px;margin-top:16px; }
+    .route { display:grid;grid-template-columns:160px 1fr 140px;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px; }
+    .route:last-child { border-bottom:0; }
+    .route-line { height:4px;background:#e8ebf1;border-radius:5px;position:relative; }
+    .route-line:after { content:"";position:absolute;left:0;top:0;height:100%;width:65%;background:var(--brand);border-radius:5px; }
+    .modal-backdrop { position:fixed;inset:0;z-index:80;background:rgba(12,20,39,.45);display:none;place-items:center;padding:20px;backdrop-filter:blur(4px); }
+    .modal-backdrop.show { display:grid; }
+    .modal { width:min(560px,100%);background:white;border-radius:18px;box-shadow:0 30px 80px rgba(10,18,39,.28);overflow:hidden; }
+    .modal-head { padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center; }
+    .modal-head h2 { font-size:15px;margin:0; }
+    .modal-head button { margin-left:auto;border:0;background:transparent;font-size:18px;color:var(--muted); }
+    .modal-body { padding:20px; }
+    .dropzone { border:1.5px dashed #b9c5dd;border-radius:14px;padding:28px;text-align:center;background:#fafcff; }
+    .dropzone b { display:block;font-size:13px;margin:9px 0 5px; }
+    .dropzone p { color:var(--muted);font-size:10px;margin:0; }
+    .modal-foot { padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px; }
+    .toast { position:fixed;right:24px;bottom:24px;z-index:100;background:#172033;color:white;padding:12px 16px;border-radius:11px;font-size:11px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s; }
+    .toast.show { opacity:1;transform:none; }
+    .login {
+      position:fixed;inset:0;z-index:200;background:#f4f6fb;display:grid;
+      grid-template-columns:minmax(420px,1.05fr) minmax(390px,.95fr);
+    }
+    .login-visual {
+      position:relative;overflow:hidden;padding:64px;color:white;
+      background:linear-gradient(145deg,#12203f,#24499b 65%,#6257ce);
+      display:flex;flex-direction:column;justify-content:center;
+    }
+    .login-visual:after { content:"";position:absolute;width:540px;height:540px;border-radius:50%;border:1px solid rgba(255,255,255,.12);right:-180px;top:-170px;box-shadow:0 0 0 70px rgba(255,255,255,.025),0 0 0 140px rgba(255,255,255,.018); }
+    .login-brand { position:absolute;left:52px;top:42px;display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px; }
+    .login-visual h1 { font-size:38px;line-height:1.3;max-width:560px;margin-bottom:18px;letter-spacing:-1px;position:relative;z-index:2; }
+    .login-visual p { color:#c8d4ef;line-height:1.8;max-width:510px;font-size:14px;position:relative;z-index:2; }
+    .login-features { display:flex;gap:22px;margin-top:34px;position:relative;z-index:2; }
+    .login-feature { font-size:11px;color:#dce5f9; }
+    .login-feature i { display:block;font-style:normal;font-size:20px;margin-bottom:7px; }
+    .login-side { background:white;display:grid;place-items:center;padding:45px; }
+    .login-box { width:min(380px,100%); }
+    .login-box .eyebrow { color:var(--brand);font-size:11px;font-weight:800;letter-spacing:1px; }
+    .login-box h2 { font-size:26px;margin:10px 0 8px; }
+    .login-box > p { color:var(--muted);font-size:12px;margin-bottom:28px; }
+    .login-box .form-control { padding:13px 12px;margin-bottom:12px; }
+    .login-help { display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin:2px 0 17px; }
+    .login-btn { width:100%;border:0;border-radius:11px;padding:13px;background:var(--brand);color:white;font-weight:750;box-shadow:0 10px 20px rgba(36,87,245,.2); }
+    .external-btn { width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;background:white;color:var(--ink);font-weight:650;margin-top:10px; }
+    .login-note { margin-top:21px!important;text-align:center;font-size:10px!important;color:#9aa2b0!important; }
+    @media (max-width:1100px) {
+      .grid-4 { grid-template-columns:repeat(2,1fr); }
+      .grid-3,.role-grid { grid-template-columns:repeat(2,1fr); }
+      .admin-grid { grid-template-columns:1fr; }
+      .login-visual { padding:44px; }
+      .login-visual h1 { font-size:30px; }
+    }
+    @media (max-width:760px) {
+      .sidebar { width:72px;padding-inline:9px; }
+      .logo { padding-inline:8px; }
+      .logo div:last-child,.nav-label,.nav-item span:last-child,.sidebar-foot { display:none; }
+      .nav-item { justify-content:center;padding:11px; }
+      .main { width:calc(100% - 72px);margin-left:72px; }
+      .content { padding:20px 16px; }
+      .topbar { padding:0 16px; }
+      .search-mini { display:none; }
+      .grid-3,.grid-2,.role-grid { grid-template-columns:1fr; }
+      .login { grid-template-columns:1fr; }
+      .login-visual { display:none; }
+      .page-head { align-items:flex-start;flex-direction:column; }
+      .page-head .actions { margin-left:0; }
+      .route { grid-template-columns:1fr; }
+      .user-pill strong,.user-pill small { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login" id="loginScreen">
+    <div class="login-visual">
+      <div class="login-brand"><span class="logo-mark">B</span> BrandOS</div>
+      <h1>让每一份品牌资产，<br>都能被准确地找到和使用。</h1>
+      <p>统一管理企业知识、品牌素材与PPT模板。通过权限可控的智能Agent，让内部员工和外部伙伴获得恰到好处的信息。</p>
+      <div class="login-features">
+        <div class="login-feature"><i>◈</i>资料有出处</div>
+        <div class="login-feature"><i>◎</i>权限可追溯</div>
+        <div class="login-feature"><i>▣</i>内容可生成</div>
+      </div>
+    </div>
+    <div class="login-side">
+      <div class="login-box">
+        <div class="eyebrow">ENTERPRISE AI PORTAL</div>
+        <h2>欢迎登录</h2>
+        <p>请输入公司分配给您的账号</p>
+        <input class="form-control" value="demo@company.cn" aria-label="账号" />
+        <input class="form-control" value="••••••••••" type="password" aria-label="密码" />
+        <div class="login-help"><label><input type="checkbox" checked> 记住账号</label><span>忘记密码？</span></div>
+        <button class="login-btn" onclick="enterApp('internal')">进入内部员工端</button>
+        <button class="external-btn" onclick="enterApp('external')">预览外部用户端</button>
+        <p class="login-note">原型演示 · 无需真实账号或密码</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">B</div>
+        <div><b>BrandOS</b><small>企业品牌智能平台</small></div>
+      </div>
+      <div class="nav-label">工作台</div>
+      <button class="nav-item active" data-view="agent"><span class="nav-icon">✦</span><span>智能助手</span></button>
+      <button class="nav-item" data-view="assets"><span class="nav-icon">▦</span><span>素材中心</span></button>
+      <button class="nav-item" data-view="ppt"><span class="nav-icon">▣</span><span>PPT生成</span></button>
+      <button class="nav-item" data-view="tasks"><span class="nav-icon">◷</span><span>我的任务</span></button>
+      <div class="admin-only">
+        <div class="nav-label">管理后台</div>
+        <button class="nav-item" data-view="dashboard"><span class="nav-icon">◫</span><span>管理概览</span></button>
+        <button class="nav-item" data-view="knowledge"><span class="nav-icon">▤</span><span>资料管理</span></button>
+        <button class="nav-item" data-view="permissions"><span class="nav-icon">♙</span><span>用户与权限</span></button>
+        <button class="nav-item" data-view="templates"><span class="nav-icon">◇</span><span>模板管理</span></button>
+        <button class="nav-item" data-view="models"><span class="nav-icon">⌁</span><span>模型设置</span></button>
+        <button class="nav-item" data-view="audit"><span class="nav-icon">≡</span><span>审计日志</span></button>
+      </div>
+      <div class="sidebar-foot">
+        <strong>私有化部署</strong>
+        <span>数据服务运行正常 · 99.9%</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">BrandOS / <b id="crumbName">智能助手</b></div>
+        <div class="top-actions">
+          <div class="search-mini">⌕ 搜索资料、素材或功能</div>
+          <button class="icon-btn" title="通知">♢</button>
+          <button class="user-pill" onclick="showLogin()">
+            <span class="avatar" id="avatarText">林</span>
+            <span><strong id="userName">林嘉怡</strong><small id="userRole">品牌管理员</small></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="view active" id="view-agent">
+          <div class="hero">
+            <div class="hero-kicker">BRAND KNOWLEDGE AGENT</div>
+            <h1>早上好，林嘉怡</h1>
+            <p>我可以从您有权限访问的公司资料中查找答案、定位素材，并根据品牌规范生成PPT与文案。</p>
+            <div class="askbox">
+              <input id="askInput" placeholder="例如：帮我找ICE产品的高清图片，并写一段领英介绍…" />
+              <button onclick="askDemo()">发送 ↗</button>
+            </div>
+          </div>
+          <div class="section-title"><h2>快捷开始</h2><span>根据常用场景推荐</span></div>
+          <div class="grid grid-4">
+            <div class="card quick" onclick="prefill('介绍一下我们公司的核心产品，并注明资料来源')"><div class="qicon">⌕</div><h3>询问公司资料</h3><p>基于授权知识库回答，自动标注引用出处。</p></div>
+            <div class="card quick" onclick="switchView('assets')"><div class="qicon">▦</div><h3>查找品牌素材</h3><p>搜索Logo、字体、产品图、视频等原始文件。</p></div>
+            <div class="card quick" onclick="switchView('ppt')"><div class="qicon">▣</div><h3>生成公司PPT</h3><p>匹配标准模板，生成可编辑的演示文稿。</p></div>
+            <div class="card quick" onclick="prefill('根据最新产品资料，写一篇适合领英发布的中文文案')"><div class="qicon">✎</div><h3>撰写品牌文案</h3><p>依据资料和品牌语气，生成对外传播内容。</p></div>
+          </div>
+          <div class="section-title"><h2>最近使用</h2></div>
+          <div class="card recent">
+            <div class="recent-row"><b>ECC系列的核心卖点有哪些？</b><span>今天 09:42</span><i class="chip">资料问答</i></div>
+            <div class="recent-row"><b>2026春季新品客户介绍PPT</b><span>昨天 16:18</span><i class="chip green">已生成</i></div>
+            <div class="recent-row"><b>查找白底高清版公司Logo</b><span>7月1日</span><i class="chip orange">素材检索</i></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-assets">
+          <div class="page-head">
+            <div><h1>素材中心</h1><p>仅展示您有权限访问的品牌资产，下载与使用均会记录。</p></div>
+            <div class="actions admin-only"><button class="btn" onclick="openUpload()">上传素材</button><button class="btn primary">新建素材集</button></div>
+          </div>
+          <div class="card toolbar">
+            <div class="field grow">⌕ 搜索文件名、产品、颜色或使用场景</div>
+            <select class="field"><option>全部类型</option><option>Logo</option><option>产品图片</option><option>视频</option></select>
+            <select class="field"><option>全部产品线</option><option>DC</option><option>ECC</option><option>ICE</option><option>IFC</option></select>
+            <select class="field"><option>最新更新</option><option>最常使用</option></select>
+          </div>
+          <div class="grid grid-4">
+            <div class="card asset-card"><div class="thumb gridbg"><div class="logo-demo">BRAND</div></div><div class="asset-info"><h3>标准横版Logo｜蓝色</h3><div class="meta"><span>AI · SVG · PNG</span><i class="chip green">已审核</i></div></div></div>
+            <div class="card asset-card"><div class="thumb blue"><div class="product-shape"></div></div><div class="asset-info"><h3>ICE 产品主图 01</h3><div class="meta"><span>6000×6000 · PNG</span><i class="chip">内部</i></div></div></div>
+            <div class="card asset-card"><div class="thumb warm"><div class="product-shape" style="background:linear-gradient(160deg,#fff,#d59b73)"></div></div><div class="asset-info"><h3>ECC 系列场景图</h3><div class="meta"><span>4800×3200 · JPG</span><i class="chip green">公开</i></div></div></div>
+            <div class="card asset-card"><div class="thumb dark"><div class="video-demo">▶</div></div><div class="asset-info"><h3>企业品牌宣传片 2026</h3><div class="meta"><span>03:28 · MP4</span><i class="chip green">公开</i></div></div></div>
+            <div class="card asset-card"><div class="thumb blue"><div class="product-shape" style="height:62px;width:78px;border-radius:12px"></div></div><div class="asset-info"><h3>DC 产品组合图</h3><div class="meta"><span>7200×4200 · PNG</span><i class="chip">内部</i></div></div></div>
+            <div class="card asset-card"><div class="thumb gridbg"><div style="font-size:26px;font-family:serif">Aa 字体规范</div></div><div class="asset-info"><h3>企业标准字体包</h3><div class="meta"><span>OTF · 使用说明</span><i class="chip orange">受限</i></div></div></div>
+            <div class="card asset-card"><div class="thumb dark"><div class="logo-demo" style="color:white">BRAND</div></div><div class="asset-info"><h3>深色背景反白Logo</h3><div class="meta"><span>AI · SVG · PNG</span><i class="chip green">公开</i></div></div></div>
+            <div class="card asset-card"><div class="thumb warm"><div style="width:90px;height:66px;background:white;border-radius:4px;box-shadow:0 10px 20px #ba8d7080"></div></div><div class="asset-info"><h3>标准信笺与名片</h3><div class="meta"><span>AI · PDF</span><i class="chip">内部</i></div></div></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-ppt">
+          <div class="page-head"><div><h1>生成公司PPT</h1><p>选择使用场景和模板，Agent将根据授权资料生成可编辑PPT。</p></div></div>
+          <div class="steps">
+            <div class="step active"><i>1</i>选择模板</div>
+            <div class="step"><i>2</i>填写需求</div>
+            <div class="step"><i>3</i>生成大纲</div>
+            <div class="step"><i>4</i>导出文件</div>
+          </div>
+          <div class="grid grid-2">
+            <div>
+              <div class="grid grid-2">
+                <div class="card template-card selected" onclick="selectTemplate(this)"><div class="slide-preview"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual"></div></div><div class="template-info"><h3>公司综合介绍</h3><div class="meta">适用：客户初访、展会</div></div></div>
+                <div class="card template-card" onclick="selectTemplate(this)"><div class="slide-preview light"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual" style="background:linear-gradient(135deg,#ff9b55,#ffcc76)"></div></div><div class="template-info"><h3>产品解决方案</h3><div class="meta">适用：产品提案、销售</div></div></div>
+                <div class="card template-card" onclick="selectTemplate(this)"><div class="slide-preview" style="background:#08364b"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual" style="background:linear-gradient(135deg,#0fb897,#73e5d2)"></div></div><div class="template-info"><h3>项目汇报</h3><div class="meta">适用：内部复盘、月报</div></div></div>
+                <div class="card template-card" onclick="selectTemplate(this)"><div class="slide-preview light"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual" style="background:linear-gradient(135deg,#222,#777)"></div></div><div class="template-info"><h3>培训课件</h3><div class="meta">适用：产品与品牌培训</div></div></div>
+              </div>
+            </div>
+            <div class="card form-card">
+              <h2 style="font-size:16px">本次PPT需求</h2>
+              <div class="form-group"><label>演示主题</label><input class="form-control" value="面向重点客户的公司与产品介绍"></div>
+              <div class="grid grid-2">
+                <div class="form-group"><label>目标受众</label><select class="form-control"><option>潜在客户</option><option>合作伙伴</option><option>内部员工</option></select></div>
+                <div class="form-group"><label>预计页数</label><select class="form-control"><option>约 15 页</option><option>约 10 页</option><option>约 20 页</option></select></div>
+              </div>
+              <div class="form-group"><label>需要重点介绍</label><textarea class="form-control">公司实力、ICE与ECC产品线、典型应用场景及服务能力。</textarea></div>
+              <div class="form-group"><label>资料范围</label><select class="form-control"><option>使用全部已授权资料</option><option>仅使用公开资料</option></select></div>
+              <button class="btn primary" style="width:100%;padding:12px" onclick="toast('已创建生成任务，预计需要 2–4 分钟')">生成PPT大纲</button>
+              <p style="color:var(--muted);font-size:9px;text-align:center;margin:10px 0 0">生成前会先展示大纲和资料引用，确认后再制作文件。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-tasks">
+          <div class="page-head"><div><h1>我的任务</h1><p>查看PPT、文案和资料解析任务的进度。</p></div></div>
+          <div class="card table-card"><table><thead><tr><th>任务</th><th>类型</th><th>创建时间</th><th>进度</th><th>状态</th></tr></thead><tbody>
+            <tr><td><b>2026春季新品客户介绍</b></td><td>PPT生成</td><td>昨天 16:18</td><td>100%</td><td><i class="chip green">可下载</i></td></tr>
+            <tr><td><b>ECC系列领英推广文案</b></td><td>文案生成</td><td>昨天 14:05</td><td>100%</td><td><i class="chip green">已完成</i></td></tr>
+            <tr><td><b>产品资料批量解析</b></td><td>知识索引</td><td>7月1日 11:20</td><td>72%</td><td><i class="chip orange">处理中</i></td></tr>
+          </tbody></table></div>
+        </section>
+
+        <section class="view" id="view-dashboard">
+          <div class="page-head"><div><h1>管理概览</h1><p>掌握内容资产、Agent使用和系统运行情况。</p></div><div class="actions"><button class="btn">导出报告</button><button class="btn primary" onclick="openUpload()">＋ 上传资料</button></div></div>
+          <div class="grid grid-4">
+            <div class="card stat"><div class="stat-top"><span>知识库文件</span><span>▤</span></div><b>1,284</b><small>↑ 本月新增 86</small></div>
+            <div class="card stat"><div class="stat-top"><span>品牌素材</span><span>▦</span></div><b>5,736</b><small>↑ 本月新增 214</small></div>
+            <div class="card stat"><div class="stat-top"><span>活跃用户</span><span>♙</span></div><b>328</b><small>↑ 较上月 12.5%</small></div>
+            <div class="card stat"><div class="stat-top"><span>本月问答</span><span>✦</span></div><b>9,421</b><small class="neutral">回答采纳率 91.6%</small></div>
+          </div>
+          <div class="admin-grid">
+            <div class="card"><div class="panel-head"><h2>近7日 Agent 使用量</h2><a>查看详情</a></div><div class="bars"><div class="bar-col"><div class="bar" style="height:48%"></div>周一</div><div class="bar-col"><div class="bar" style="height:65%"></div>周二</div><div class="bar-col"><div class="bar" style="height:58%"></div>周三</div><div class="bar-col"><div class="bar" style="height:82%"></div>周四</div><div class="bar-col"><div class="bar" style="height:72%"></div>周五</div><div class="bar-col"><div class="bar" style="height:40%"></div>周六</div><div class="bar-col"><div class="bar" style="height:28%"></div>周日</div></div></div>
+            <div class="card"><div class="panel-head"><h2>近期动态</h2><a>全部日志</a></div><div class="activity">
+              <div class="activity-row"><div class="doticon">↑</div><div><strong>品牌部上传了 24 个产品素材</strong><small>12分钟前 · ICE产品线</small></div></div>
+              <div class="activity-row"><div class="doticon">✓</div><div><strong>《VI手册 2026》已审核发布</strong><small>1小时前 · 王敏</small></div></div>
+              <div class="activity-row"><div class="doticon">♙</div><div><strong>新增 8 个外部用户账号</strong><small>今天 09:20 · 系统管理员</small></div></div>
+              <div class="activity-row"><div class="doticon">!</div><div><strong>3 份资料等待确认权限</strong><small>昨天 17:42 · 待处理</small></div></div>
+            </div></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-knowledge">
+          <div class="page-head"><div><h1>资料管理</h1><p>管理知识库、素材库和模板库的上传、权限、版本与索引状态。</p></div><div class="actions"><button class="btn">批量操作</button><button class="btn primary" onclick="openUpload()">＋ 上传资料</button></div></div>
+          <div class="tabs"><button class="tab active">知识库 1,284</button><button class="tab">素材库 5,736</button><button class="tab">待审核 12</button><button class="tab">解析异常 3</button></div>
+          <div class="card toolbar"><div class="field grow">⌕ 搜索文件名、标签或上传人</div><select class="field"><option>全部目录</option><option>VI手册</option><option>产品资料</option><option>公司介绍</option></select><select class="field"><option>全部权限</option><option>公开</option><option>内部</option><option>机密</option></select></div>
+          <div class="card table-card"><table><thead><tr><th><input type="checkbox"> 文件</th><th>分类</th><th>访问级别</th><th>版本</th><th>索引状态</th><th>更新人 / 时间</th><th>操作</th></tr></thead><tbody>
+            <tr><td><div class="file-cell"><input type="checkbox"><div class="file-icon">PDF</div><div><b>企业VI视觉识别手册 2026</b><small>18.4 MB · 84页</small></div></div></td><td>VI手册</td><td><i class="chip">内部</i></td><td>v3.2</td><td><i class="chip green">已索引</i></td><td>王敏 · 1小时前</td><td>···</td></tr>
+            <tr><td><div class="file-cell"><input type="checkbox"><div class="file-icon">PPT</div><div><b>公司介绍标准版</b><small>42.8 MB · 36页</small></div></div></td><td>公司介绍</td><td><i class="chip green">公开</i></td><td>v5.0</td><td><i class="chip green">已索引</i></td><td>李想 · 昨天</td><td>···</td></tr>
+            <tr><td><div class="file-cell"><input type="checkbox"><div class="file-icon">DOC</div><div><b>ICE系列产品技术说明</b><small>9.7 MB · 52页</small></div></div></td><td>产品资料</td><td><i class="chip">内部</i></td><td>v2.4</td><td><i class="chip orange">解析中 72%</i></td><td>赵宁 · 昨天</td><td>···</td></tr>
+            <tr><td><div class="file-cell"><input type="checkbox"><div class="file-icon">PDF</div><div><b>经销商产品手册</b><small>25.1 MB · 64页</small></div></div></td><td>产品资料</td><td><i class="chip green">公开</i></td><td>v1.8</td><td><i class="chip green">已索引</i></td><td>陈晨 · 7月1日</td><td>···</td></tr>
+            <tr><td><div class="file-cell"><input type="checkbox"><div class="file-icon">XLS</div><div><b>产品价格与渠道政策</b><small>2.1 MB · 8个工作表</small></div></div></td><td>销售政策</td><td><i class="chip orange">机密</i></td><td>v6.1</td><td><i class="chip gray">不参与问答</i></td><td>周凌 · 6月30日</td><td>···</td></tr>
+          </tbody></table></div>
+        </section>
+
+        <section class="view" id="view-permissions">
+          <div class="page-head"><div><h1>用户与权限</h1><p>通过角色、部门和资料范围控制功能与内容访问。</p></div><div class="actions"><button class="btn">导入用户</button><button class="btn primary">＋ 新建账号</button></div></div>
+          <div class="tabs"><button class="tab active">内部用户 326</button><button class="tab">外部用户 74</button><button class="tab">角色配置</button><button class="tab">部门管理</button></div>
+          <div class="role-grid">
+            <div class="card role-card"><div class="role-head"><b>系统管理员</b><span class="count">3人</span></div><p>管理系统配置、账号、角色及全部审计日志。</p><ul class="permission-list"><li>系统设置 <span class="toggle on"></span></li><li>全部资料 <span class="toggle on"></span></li><li>模型管理 <span class="toggle on"></span></li></ul></div>
+            <div class="card role-card"><div class="role-head"><b>品牌管理员</b><span class="count">12人</span></div><p>维护品牌资料、审核发布内容并管理模板。</p><ul class="permission-list"><li>上传与审核 <span class="toggle on"></span></li><li>全部品牌素材 <span class="toggle on"></span></li><li>用户管理 <span class="toggle"></span></li></ul></div>
+            <div class="card role-card"><div class="role-head"><b>普通员工</b><span class="count">287人</span></div><p>使用Agent、查找内部素材并生成文案和PPT。</p><ul class="permission-list"><li>内部资料问答 <span class="toggle on"></span></li><li>下载授权素材 <span class="toggle on"></span></li><li>上传资料 <span class="toggle"></span></li></ul></div>
+            <div class="card role-card"><div class="role-head"><b>受限员工</b><span class="count">24人</span></div><p>仅访问所属部门、产品线或项目的指定资料。</p><ul class="permission-list"><li>指定知识库 <span class="toggle on"></span></li><li>公开素材 <span class="toggle on"></span></li><li>内部全库 <span class="toggle"></span></li></ul></div>
+            <div class="card role-card"><div class="role-head"><b>外部用户</b><span class="count">74人</span></div><p>统一访问已审核的公开资料和外部版Agent。</p><ul class="permission-list"><li>公开资料问答 <span class="toggle on"></span></li><li>公开素材下载 <span class="toggle on"></span></li><li>PPT生成 <span class="toggle"></span></li></ul></div>
+            <div class="card role-card" style="border-style:dashed;display:grid;place-items:center;min-height:200px;color:var(--muted)"><div style="text-align:center"><b style="font-size:24px;font-weight:400">＋</b><p style="margin:6px 0">新建自定义角色</p></div></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-templates">
+          <div class="page-head"><div><h1>模板管理</h1><p>定义PPT模板的场景、版式、占位符和可使用范围。</p></div><div class="actions"><button class="btn primary">＋ 上传PPT模板</button></div></div>
+          <div class="grid grid-3">
+            <div class="card template-card"><div class="slide-preview"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual"></div></div><div class="template-info"><h3>公司综合介绍｜标准版</h3><div class="meta"><span>32个版式 · v5.0</span><i class="chip green">已启用</i></div></div></div>
+            <div class="card template-card"><div class="slide-preview light"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual" style="background:linear-gradient(135deg,#ff9b55,#ffcc76)"></div></div><div class="template-info"><h3>产品解决方案｜销售版</h3><div class="meta"><span>26个版式 · v3.4</span><i class="chip green">已启用</i></div></div></div>
+            <div class="card template-card"><div class="slide-preview" style="background:#08364b"><div class="mini-line"></div><div class="mini-line small"></div><div class="visual" style="background:linear-gradient(135deg,#0fb897,#73e5d2)"></div></div><div class="template-info"><h3>项目汇报｜内部版</h3><div class="meta"><span>18个版式 · v2.1</span><i class="chip">仅内部</i></div></div></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-models">
+          <div class="page-head"><div><h1>模型设置</h1><p>统一管理本地模型与外部API，并根据资料密级设置路由。</p></div><div class="actions"><button class="btn primary">保存配置</button></div></div>
+          <div class="grid grid-3">
+            <div class="card model-card"><i class="chip green model-tag">运行中</i><div class="model-logo">LOCAL</div><h3>公司本地大模型</h3><p>部署在公司服务器，用于处理内部与机密资料，内容不离开内网。</p><div class="config-row"><span>推理服务</span><span>10.0.1.24:8000</span></div><div class="config-row"><span>平均响应</span><span>3.8 秒</span></div></div>
+            <div class="card model-card"><i class="chip gray model-tag">未启用</i><div class="model-logo">DS</div><h3>DeepSeek API</h3><p>可选外部模型服务，仅允许处理公开资料和非敏感生成任务。</p><div class="config-row"><span>API密钥</span><span>未配置</span></div><div class="config-row"><span>调用上限</span><span>0 / 月</span></div></div>
+            <div class="card model-card"><i class="chip gray model-tag">未启用</i><div class="model-logo">AI</div><h3>OpenAI API</h3><p>可选外部模型服务，通过模型网关调用，不直接绑定知识库。</p><div class="config-row"><span>API密钥</span><span>未配置</span></div><div class="config-row"><span>数据策略</span><span>仅公开资料</span></div></div>
+          </div>
+          <div class="card routing">
+            <div class="panel-head" style="padding:0 0 12px"><h2>模型路由策略</h2><a>策略说明</a></div>
+            <div class="route"><b>机密资料</b><div class="route-line"></div><span class="chip green">仅本地模型</span></div>
+            <div class="route"><b>内部资料</b><div class="route-line"></div><span class="chip green">仅本地模型</span></div>
+            <div class="route"><b>公开资料</b><div class="route-line"></div><span class="chip">本地模型优先</span></div>
+            <div class="route"><b>公开文案生成</b><div class="route-line"></div><span class="chip orange">可使用外部API</span></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-audit">
+          <div class="page-head"><div><h1>审计日志</h1><p>追踪登录、问答、文件访问、下载、生成和权限变更。</p></div><div class="actions"><button class="btn">导出日志</button></div></div>
+          <div class="card toolbar"><div class="field grow">⌕ 搜索用户、文件或操作</div><select class="field"><option>全部操作</option><option>下载</option><option>问答</option><option>权限变更</option></select><div class="field">2026/06/27 — 2026/07/03</div></div>
+          <div class="card table-card"><table><thead><tr><th>时间</th><th>用户</th><th>身份</th><th>操作</th><th>对象 / 详情</th><th>IP地址</th><th>结果</th></tr></thead><tbody>
+            <tr><td>今天 10:24:18</td><td>林嘉怡</td><td>品牌管理员</td><td>发布资料</td><td>《VI手册 2026》v3.2</td><td>10.0.2.18</td><td><i class="chip green">成功</i></td></tr>
+            <tr><td>今天 10:16:42</td><td>陈凯</td><td>普通员工</td><td>素材下载</td><td>ICE_产品主图_01.png</td><td>10.0.8.32</td><td><i class="chip green">成功</i></td></tr>
+            <tr><td>今天 09:58:07</td><td>partner_028</td><td>外部用户</td><td>访问资料</td><td>内部销售政策.xlsx</td><td>218.17.***.41</td><td><i class="chip orange">权限拒绝</i></td></tr>
+            <tr><td>今天 09:42:26</td><td>林嘉怡</td><td>品牌管理员</td><td>Agent问答</td><td>ECC系列核心卖点</td><td>10.0.2.18</td><td><i class="chip green">成功</i></td></tr>
+          </tbody></table></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal">
+      <div class="modal-head"><h2>上传资料</h2><button onclick="closeUpload()">×</button></div>
+      <div class="modal-body">
+        <div class="dropzone"><div style="font-size:28px;color:var(--brand)">⇧</div><b>拖入文件或点击选择</b><p>支持 PDF、Word、Excel、PPT、图片及视频；单文件最大 2GB</p></div>
+        <div class="grid grid-2" style="margin-top:16px">
+          <div class="form-group"><label>存入资料库</label><select class="form-control"><option>知识库</option><option>素材库</option><option>模板库</option></select></div>
+          <div class="form-group"><label>访问级别</label><select class="form-control"><option>内部</option><option>公开</option><option>机密</option></select></div>
+        </div>
+        <div class="form-group"><label>所属目录</label><select class="form-control"><option>请选择目录</option><option>VI手册</option><option>产品资料 / ICE</option><option>公司介绍</option></select></div>
+        <div class="form-group"><label>标签</label><input class="form-control" placeholder="例如：ICE、2026、新品、对外发布"></div>
+      </div>
+      <div class="modal-foot"><button class="btn" onclick="closeUpload()">取消</button><button class="btn primary" onclick="finishUpload()">上传并提交审核</button></div>
+    </div>
+  </div>
+  <div class="toast" id="toast">操作成功</div>
+
+  <script>
+    const names = {
+      agent:'智能助手', assets:'素材中心', ppt:'PPT生成', tasks:'我的任务',
+      dashboard:'管理概览', knowledge:'资料管理', permissions:'用户与权限',
+      templates:'模板管理', models:'模型设置', audit:'审计日志'
+    };
+    document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+    function switchView(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + name).classList.add('active');
+      document.querySelector(`.nav-item[data-view="${name}"]`).classList.add('active');
+      document.getElementById('crumbName').textContent = names[name];
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function enterApp(type) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      const external = type === 'external';
+      document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', external));
+      document.getElementById('userName').textContent = external ? '外部体验用户' : '林嘉怡';
+      document.getElementById('userRole').textContent = external ? '外部用户' : '品牌管理员';
+      document.getElementById('avatarText').textContent = external ? '外' : '林';
+      switchView(external ? 'agent' : 'dashboard');
+      toast(external ? '已进入外部用户视图，仅可访问公开资料' : '已进入品牌管理员视图');
+    }
+    function showLogin(){ document.getElementById('loginScreen').classList.remove('hidden'); }
+    function openUpload(){ document.getElementById('uploadModal').classList.add('show'); }
+    function closeUpload(){ document.getElementById('uploadModal').classList.remove('show'); }
+    function finishUpload(){ closeUpload(); toast('文件已进入上传与审核队列'); }
+    function toast(msg) {
+      const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show');
+      clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+    function prefill(text) { document.getElementById('askInput').value = text; document.getElementById('askInput').focus(); }
+    function askDemo() {
+      const q = document.getElementById('askInput').value.trim();
+      if(!q) return toast('请先输入问题');
+      toast('正在从您有权限的资料中检索答案…');
+    }
+    function selectTemplate(el){ document.querySelectorAll('.template-card').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); }
+  </script>
+</body>
+</html>
